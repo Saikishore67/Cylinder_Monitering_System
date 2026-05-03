@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cylinder Monitor – ABC Hotel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<!-- Loading screen -->
+<div class="page-loading" id="pageLoading">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Initializing monitoring system…</div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="hotel-icon">🏨</div>
+    <h2>ABC Hotel</h2>
+    <span>ID: H001</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main Menu</div>
+    <div class="nav-item active" data-menu="overview" onclick="setActiveMenu(this)">
+      <span class="nav-icon">▣</span> Overview
+    </div>
+    <div class="nav-item" data-menu="trends" onclick="setActiveMenu(this)">
+      <span class="nav-icon">📈</span> Usage Trends
+    </div>
+    <div class="nav-item" data-menu="logs" onclick="setActiveMenu(this)">
+      <span class="nav-icon">📋</span> Event Logs
+    </div>
+    <div class="nav-item" data-menu="maintenance" onclick="setActiveMenu(this)">
+      <span class="nav-icon">⚙️</span> Maintenance
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="emergency-btn" onclick="handleEmergency()">
+      ✳ Emergency Support
+    </button>
+    <div class="nav-item" onclick="alert('Settings panel coming soon.')">
+      <span class="nav-icon">⚙</span> Settings
+    </div>
+    <div class="nav-item" onclick="handleLogout()">
+      <span class="nav-icon">→</span> Log Out
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</div>
+    <div class="navbar-brand">Cylinder Monitor</div>
+    <div class="live-dot">LIVE</div>
+
+    <div class="navbar-tabs">
+      <button class="nav-tab active" onclick="setActiveTab(this)">Dashboard</button>
+      <button class="nav-tab" onclick="setActiveTab(this)">Analytics</button>
+      <button class="nav-tab" onclick="setActiveTab(this)">History</button>
+    </div>
+
+    <div class="navbar-actions">
+      <div class="icon-btn" onclick="showNotif()" title="Notifications">
+        🔔<span class="notif-dot"></span>
+      </div>
+      <div class="icon-btn" onclick="showHelp()" title="Help">❓</div>
+      <div class="icon-btn dark-toggle" onclick="toggleDark()" id="darkBtn" title="Toggle dark mode">🌙</div>
+      <div class="user-profile">
+        <div class="user-avatar">O4</div>
+        <div class="user-info">
+          <div class="user-name">Operator 04</div>
+          <div class="user-role">Shift Manager</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE BODY -->
+  <div class="page-body">
+
+    <!-- STATUS BANNER -->
+    <div class="status-banner fade-up">
+      <div class="banner-icon">ℹ</div>
+      <div class="banner-text">
+        <div class="banner-title">System Monitoring Active</div>
+        <div class="banner-sub">All cylinders are currently within safe weight parameters for ID: H001</div>
+      </div>
+      <button class="view-thresh-btn" onclick="viewThresholds()">View Thresholds</button>
+    </div>
+
+    <!-- CARDS ROW -->
+    <div class="cards-row">
+
+      <!-- LEFT: Cylinder Status -->
+      <div class="card fade-up">
+        <div class="card-header">
+          <div>
+            <div class="card-label">Current Cylinder Weight</div>
+            <div class="card-title">Main Supply Tank A</div>
+          </div>
+          <div class="status-badge">
+            <span class="badge-dot"></span> Normal
+          </div>
+        </div>
+
+        <div class="weight-display">
+          <div class="weight-value">
+            <span id="weightVal">24.5</span>
+            <span class="weight-unit">kg</span>
+          </div>
+          <div class="weight-updated" id="lastUpdated">Last updated: 5 minutes ago</div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-labels">
+            <span class="progress-label" id="fillLabel">Fill Level (68%)</span>
+            <span class="progress-capacity">Capacity: 36.0 kg</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Weight Trends -->
+      <div class="card fade-up">
+        <div class="chart-header">
+          <div>
+            <div class="card-title">Weight Trends</div>
+            <div class="chart-sub">Consumption analysis over the last 24 hours</div>
+          </div>
+          <select class="time-select" id="timeRange" onchange="updateChart()">
+            <option value="24">Last 24 Hours</option>
+            <option value="12">Last 12 Hours</option>
+            <option value="6">Last 6 Hours</option>
+            <option value="3">Last 3 Hours</option>
+          </select>
+        </div>
+        <div class="chart-container">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY TABLE -->
+    <div class="table-card fade-up">
+      <div class="table-header">
+        <div class="table-title">Activity History</div>
+        <div class="table-actions">
+          <div class="tbl-action-btn" title="Filter" onclick="alert('Filter options coming soon.')">⊞</div>
+          <div class="tbl-action-btn" title="Export" onclick="alert('Exporting data…')">↓</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Weight (kg)</th>
+            <th>Change</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="activityTable">
+          <tr>
+            <td class="ts-cell">Today, 02:45 PM</td>
+            <td class="weight-cell">24.5</td>
+            <td class="change-cell">−0.2</td>
+            <td><span class="stable-badge">Stable</span></td>
+            <td><button class="details-btn" onclick="showDetails('02:45 PM', 24.5, -0.2)">Details</button></td>
+          </tr>
+          <tr>
+            <td class="ts-cell">Today, 02:30 PM</td>
+            <td class="weight-cell">24.7</td>
+            <td class="change-cell">−0.1</td>
+            <td><span class="stable-badge">Stable</span></td>
+            <td><button class="details-btn" onclick="showDetails('02:30 PM', 24.7, -0.1)">Details</button></td>
+          </tr>
+          <tr>
+            <td class="ts-cell">Today, 02:15 PM</td>
+            <td class="weight-cell">24.8</td>
+            <td class="change-cell">−0.3</td>
+            <td><span class="stable-badge">Stable</span></td>
+            <td><button class="details-btn" onclick="showDetails('02:15 PM', 24.8, -0.3)">Details</button></td>
+          </tr>
+          <tr>
+            <td class="ts-cell">Today, 02:00 PM</td>
+            <td class="weight-cell">25.1</td>
+            <td class="change-cell">−0.1</td>
+            <td><span class="stable-badge">Stable</span></td>
+            <td><button class="details-btn" onclick="showDetails('02:00 PM', 25.1, -0.1)">Details</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()" title="Add Entry">+</button>
+
+<!-- ADD ENTRY MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <div class="modal-title">➕ Add New Entry</div>
+    <div class="modal-sub">Log a new cylinder weight reading manually.</div>
+    <input class="modal-input" type="number" id="newWeight" placeholder="Weight (kg)" step="0.1" min="0" max="36">
+    <select class="modal-input" id="newStatus">
+      <option value="stable">Stable</option>
+      <option value="warning">Warning</option>
+      <option value="critical">Critical</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="addEntry()">Add Entry</button>
+    </div>
+  </div>
+</div>
+<script src="dashboard.js" defer></script>
+</body>
+</html>

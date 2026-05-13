@@ -1,9 +1,0 @@
-.env
-firebase-credentials.json
-.venv/
-venv/
-__pycache__/
-*.pyc
-db.sqlite3
-*.log
-.vscode/

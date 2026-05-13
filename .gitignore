@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.env/
+
+# Environment variables
+.env
+
+# SQLite database
+db.sqlite3
+
+# Django stuff
+*.log
+staticfiles/
+media/
+
+# Migrations cache
+*/migrations/__pycache__/
+
+# VSCode
+.vscode/
+
+# JetBrains
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Node modules (for frontend later)
+node_modules/
+
+# Build folders
+dist/
+build/

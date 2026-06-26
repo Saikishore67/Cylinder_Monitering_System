@@ -25,3 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "email", "full_name", "created_at"]
         read_only_fields = fields
+
+
+class FirebaseTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()

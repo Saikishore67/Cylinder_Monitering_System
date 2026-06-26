@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+import firebase_admin
+from firebase_admin import credentials
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -193,3 +196,11 @@ SPECTACULAR_SETTINGS = {
         }
     },
 }
+
+
+#Firebase Initianlization
+FIREBASE_CREDENTIALS = config("FIREBASE_CREDENTIALS")
+
+if not firebase_admin._apps:
+    cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+    firebase_admin.initialize_app(cred)

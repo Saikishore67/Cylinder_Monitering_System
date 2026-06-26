@@ -1,0 +1,26 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ignoredPackages">
+        <list>
+          <option value="djangorestframework" />
+          <option value="asgiref" />
+          <option value="Django" />
+          <option value="django-stubs" />
+          <option value="django-stubs-ext" />
+          <option value="djangorestframework-simplejwt" />
+          <option value="djangorestframework-stubs" />
+          <option value="drf-spectacular" />
+          <option value="django-filter" />
+          <option value="psycopg2-binary" />
+          <option value="python-decouple" />
+          <option value="sqlparse" />
+          <option value="types-PyYAML" />
+          <option value="types-requests" />
+          <option value="tzdata" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

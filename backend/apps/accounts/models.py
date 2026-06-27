@@ -26,8 +26,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    objects = UserManager()
+    groups = models.ManyToManyField(
+        'auth.Group',
+        blank=True,
+        related_name='accounts_user_set'
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        blank=True,
+        related_name='accounts_user_set'
+    )
 
+    objects = UserManager()
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

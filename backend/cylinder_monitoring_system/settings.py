@@ -15,48 +15,34 @@ from decouple import config
 import firebase_admin
 from firebase_admin import credentials
 
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
-
-
-# Application definition
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
+    # Django core — keeping only what's needed without SQLite user model
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
-        
+    'django.contrib.auth',
+
+    # Third party
     'rest_framework',
     'drf_spectacular',
     'corsheaders',
 
+    # Our apps
     'apps.accounts',
     'apps.sensors',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -70,8 +56,6 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -79,128 +63,67 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cylinder_monitoring_system.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
+# No SQLite — Firestore is our database
+DATABASES = {}
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-AUTH_USER_MODEL = "accounts.User"
-
+# REST Framework — Firebase token verification instead of JWT
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "apps.accounts.firebase_auth.FirebaseAuthentication",
     ],
-
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
-
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
-
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-from datetime import timedelta
-from decouple import config
-
-DEBUG = config("DEBUG", default=False, cast=bool)
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(
-        hours=config("ACCESS_TOKEN_LIFETIME_HOURS", default=12, cast=int)
-    ),
-    "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=config("REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)
-    ),
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-USE_FIRESTORE = config("USE_FIRESTORE", default=False, cast=bool)
+# Firestore
+FIRESTORE_PROJECT_ID = config("FIRESTORE_PROJECT_ID", default="")
 
-FIRESTORE_PROJECT_ID = config(
-    "FIRESTORE_PROJECT_ID",
-    default=""
-)
-
-FIRESTORE_CREDENTIALS_PATH = config(
-    "FIRESTORE_CREDENTIALS_PATH",
-    default=""
-)
-
+# Swagger
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Cylinder Monitoring System API',
     'DESCRIPTION': 'Backend API for Cylinder Monitoring System',
     'VERSION': '1.0.0',
-
-    'SECURITY': [{'BearerAuth': []}],
-    'COMPONENTS': {
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    },
+    'APPEND_COMPONENTS': {
         'securitySchemes': {
             'BearerAuth': {
                 'type': 'http',
                 'scheme': 'bearer',
-                'bearerFormat': 'JWT',
+                'bearerFormat': 'Firebase',
             }
         }
     },
+    'SECURITY': [{'BearerAuth': []}],
 }
 
-
-#Firebase Initianlization
+# Firebase Initialization
 FIREBASE_CREDENTIALS = config("FIREBASE_CREDENTIALS")
 
 if not firebase_admin._apps:
     cred = credentials.Certificate(FIREBASE_CREDENTIALS)
     firebase_admin.initialize_app(cred)
+
+
+AUTH_USER_MODEL = "accounts.User"

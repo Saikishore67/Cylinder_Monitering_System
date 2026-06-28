@@ -1,89 +1,27 @@
 from rest_framework import serializers
 
-from .models import Device, SensorReading
+
+class DeviceSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    device_id = serializers.CharField()
 
 
-class DeviceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Device
-
-        fields = [
-            "id",
-            "name",
-            "device_id",
-            "created_at",
-        ]
-
-        read_only_fields = [
-            "id",
-            "created_at",
-        ]
-
-
-class SensorReadingSerializer(
-    serializers.ModelSerializer
-):
-    device_name = serializers.CharField(
-        source="device.name",
-        read_only=True,
-    )
-
-    device_id = serializers.CharField(
-        source="device.device_id",
-        read_only=True,
-    )
-
-    class Meta:
-        model = SensorReading
-
-        fields = [
-            "id",
-            "device",
-            "device_name",
-            "device_id",
-            "weight",
-            "timestamp",
-            "data",
-            "received_at",
-        ]
-
-        read_only_fields = [
-            "id",
-            "received_at",
-            "device_name",
-            "device_id",
-        ]
-
-
-class SensorReadingCreateSerializer(
-    serializers.ModelSerializer
-):
-
-    class Meta:
-        model = SensorReading
-
-        fields = [
-            "device",
-            "weight",
-            "timestamp",
-            "data",
-        ]
+class SensorReadingCreateSerializer(serializers.Serializer):
+    device_id = serializers.CharField()
+    weight = serializers.FloatField()
+    timestamp = serializers.DateTimeField(required=False)
+    data = serializers.DictField(required=False, default=dict)
 
     def validate_weight(self, value):
         if value < 0:
-            raise serializers.ValidationError(
-                "Weight cannot be negative."
-            )
-
+            raise serializers.ValidationError("Weight cannot be negative.")
         return value
 
-    def validate_device(self, value):
-        request = self.context["request"]
 
-        if value.owner != request.user:
-            raise serializers.ValidationError(
-                "You do not own this device."
-            )
-
-        return value
+class SensorReadingSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    device_id = serializers.CharField()
+    weight = serializers.FloatField()
+    timestamp = serializers.DateTimeField()
+    data = serializers.DictField(required=False, default=dict)
+    received_at = serializers.DateTimeField(read_only=True)
